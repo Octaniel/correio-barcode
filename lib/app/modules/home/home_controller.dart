@@ -138,7 +138,7 @@ class HomeController extends GetxController {
         mainAxisAlignment: pw.MainAxisAlignment.start,
         children: [
           pw.Container(
-            padding: pw.EdgeInsets.all(10),
+            padding: pw.EdgeInsets.all(5),
             decoration: pw.BoxDecoration(
               borderRadius: 3,
               border:
