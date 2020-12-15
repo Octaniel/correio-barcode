@@ -1,4 +1,6 @@
-import 'dart:io';
+// import 'dart:io';
+
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -10,24 +12,31 @@ import 'package:image/image.dart' as im;
 import 'package:barcode_image/barcode_image.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:barcode_flutter/barcode_flutter.dart';
+import 'package:printing/printing.dart';
 
-// import 'widgets/share_js.dart';
+import 'widgets/share_js.dart';
 
 class HomeController extends GetxController {
   var storage = GetStorage();
-  File img1;
+
+  // File img1;
   List<BarCodeImage<BarCodeParams>> barCodesImage = List();
   BarCodeImage<BarCodeParams> barCodeImage;
+  Uint8List savePdf;
+  var savePdfS = "".obs;
   var dd = ''.obs;
   int quantidade = 1;
-  var _barCodeImageUltimo = BarCodeImage<BarCodeParams>(params: Code39BarCodeParams(
-    'RRST',
-    lineWidth: 2.0,
-    barHeight: 80.0,
-    withText: true,
-  ),).obs;
+  var _barCodeImageUltimo = BarCodeImage<BarCodeParams>(
+    params: Code39BarCodeParams(
+      'RRST',
+      lineWidth: 2.0,
+      barHeight: 80.0,
+      withText: true,
+    ),
+  ).obs;
 
-  BarCodeImage<BarCodeParams> get barCodeImageUltimo => _barCodeImageUltimo.value;
+  BarCodeImage<BarCodeParams> get barCodeImageUltimo =>
+      _barCodeImageUltimo.value;
 
   set barCodeImageUltimo(BarCodeImage<BarCodeParams> value) {
     _barCodeImageUltimo.value = value;
@@ -40,16 +49,17 @@ class HomeController extends GetxController {
   }) async {
     GetStorage();
     String data = storage.read('ultimo');
-    if(data==null) data = '000339006';
+    if (data == null) data = '000339006';
     var dataInt = int.parse(data) + 1;
-     data = '$dataInt';
+    data = '$dataInt';
     for (int o = data.length; o < 9; o++) {
       data = '0' + data;
     }
     final pdf = pw.Document();
-    final Directory directory =
-        await path_provider.getApplicationDocumentsDirectory();
-    final String path = directory.path;
+    // final Directory directory =
+    //     await path_provider.getApplicationDocumentsDirectory();
+    // final String path = directory.path;
+    quantidade=quantidade%2==0?quantidade:quantidade+1;
     barCodesImage = List();
     for (int i = 0; i < quantidade; i++) {
       var dataInt = int.parse(data) + i;
@@ -84,46 +94,59 @@ class HomeController extends GetxController {
         data2 = '0' + data2;
       }
 
-      var fil = file(data1);
-      var fil1 = file(data2);
+      // var fil = file(data1);
+      var barcodeWidget =
+          pw.BarcodeWidget(barcode: bc, data: data1, height: 50, width: 800);
+      // var fil1 = file(data2);
+      var barcodeWidget2 =
+          pw.BarcodeWidget(barcode: bc, data: data2, height: 50, width: 800);
 
-      final image = PdfImage.file(
-        pdf.document,
-        bytes: fil.readAsBytesSync(),
-      );
-      final image1 = PdfImage.file(
-        pdf.document,
-        bytes: fil1.readAsBytesSync(),
-      );
+      // final image = PdfImage.file(
+      //   pdf.document,
+      //   bytes: fil.readAsBytesSync(),
+      // );
+      // final image1 = PdfImage.file(
+      //   pdf.document,
+      //   bytes: fil1.readAsBytesSync(),
+      // );
+
       pdf.addPage(
         pw.Page(
           pageFormat: PdfPageFormat.roll80,
           build: (pw.Context context) {
             return pw.ListView(children: [
-              center(image),
+              center('RR${data1}ST'),
               pw.Text('--------------------------------------------'),
               pw.SizedBox(height: 5),
-              w > -1 ? center(image1) : pw.Text(''),
+              w > -1 ? center('RR${data2}ST') : pw.Text(''),
             ]); // Center
           },
         ),
       );
       storage.write('ultimo', w > -1 ? data2 : data1);
       pegarUltimo();
-      dd.value=w > -1 ? data2 : data1;
+      dd.value = w > -1 ? data2 : data1;
     }
 
-
-
-    img1 = File('$path/$filename.pdf');
-    img1.writeAsBytesSync(pdf.save());
+    // img1 = File('$path/$filename.pdf');
+    // img1.writeAsBytesSync(pdf.save());
     // path = img1.path;
     // print('${img1.path}');
-    // share(
-    //   bytes: pdf.save(),
-    //   filename: '$filename.pdf',
-    //   mimetype: 'application/pdf'
-    // );
+
+
+    savePdf = pdf.save();
+    savePdfS.value = data;
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) {
+        return savePdf;
+      },
+      name: 'RR000339006ST',
+      format: PdfPageFormat.roll80,
+    );
+    share(
+        bytes: savePdf,
+        filename: '$filename.pdf',
+        mimetype: 'application/pdf');
     update();
   }
 
@@ -131,7 +154,7 @@ class HomeController extends GetxController {
     for (int i = 0; i < quantidade; i++) {}
   }
 
-  center(PdfImage image) {
+  center(String data) {
     return pw.Center(
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -190,12 +213,24 @@ class HomeController extends GetxController {
                     ]),
                   ],
                 ),
-                pw.SizedBox(height: 5),
-                pw.Image(image, width: 200),
+                // pw.SizedBox(height: 5),
+                pw.BarcodeWidget(
+                    barcode: Barcode.code39(),
+                    data: data,
+                    height: 40,
+                    width: 800),
                 pw.Text('--------------------------------------------'),
-                pw.Image(image, width: 200),
+                pw.BarcodeWidget(
+                    barcode: Barcode.code39(),
+                    data: data,
+                    height: 40,
+                    width: 800),
                 pw.Text('--------------------------------------------'),
-                pw.Image(image, width: 200),
+                pw.BarcodeWidget(
+                    barcode: Barcode.code39(),
+                    data: data,
+                    height: 40,
+                    width: 800),
               ],
             ),
           ),
@@ -204,14 +239,14 @@ class HomeController extends GetxController {
     );
   }
 
-  File file(String data) {
-    final imag = im.Image(800, 150);
-    im.fill(imag, im.getColor(255, 255, 255));
-    drawBarcode(imag, Barcode.code39(), 'RR${data}ST', font: im.arial_48);
-    var fil = File('$data.png');
-    fil.writeAsBytesSync(im.encodePng(imag));
-    return fil;
-  }
+  // File file(String data) {
+  //   final imag = im.Image(800, 150);
+  //   im.fill(imag, im.getColor(255, 255, 255));
+  //   drawBarcode(imag, Barcode.code39(), 'RR${data}ST', font: im.arial_48);
+  //   var fil = File('$data.png');
+  //   fil.writeAsBytesSync(im.encodePng(imag));
+  //   return fil;
+  // }
 
   pegarUltimo() {
     var read = storage.read<String>('ultimo');
@@ -262,7 +297,7 @@ class HomeController extends GetxController {
             print('error = $error');
           },
         );
-        dd.value=ultimo;
+        dd.value = ultimo;
         update(['barCodeImageUltimo']);
       }
     } catch (e) {

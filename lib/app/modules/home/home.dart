@@ -3,6 +3,8 @@ import 'package:correiobarcode/app/modules/home/home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 
 class HomePage extends GetView<HomeController> {
   @override
@@ -140,9 +142,9 @@ class HomePage extends GetView<HomeController> {
                         margin:
                             EdgeInsets.symmetric(horizontal: Get.width * .1),
                         child: RaisedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             controller.buildBarcode(
-                              Barcode.code93(),
+                              Barcode.code39(),
                               filename: 'RR000339006ST',
                             );
                           },
@@ -152,12 +154,18 @@ class HomePage extends GetView<HomeController> {
                       SizedBox(
                         height: 5,
                       ),
-                      // Container(
-                      //   height: 100,
-                      //   child: PdfPreview(build: (PdfPageFormat format) {
-                      //     return controller.img1.readAsBytesSync();
-                      //   },),
-                      // ),
+                      // GetBuilder<HomeController>(
+                      //   builder: (_) {
+                      //     return controller.savePdfS.value.isNotEmpty?Container(
+                      //       height: 500,
+                      //       child: PdfPreview(
+                      //         build: (PdfPageFormat format) {
+                      //           return controller.savePdf;
+                      //         },
+                      //       ),
+                      //     ):Container();
+                      //   },
+                      // )
                     ],
                   ),
                 ),

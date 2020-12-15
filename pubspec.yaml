@@ -34,8 +34,9 @@ dependencies:
   barcode_image: ^1.2.0
   barcode_flutter: ^1.1.2
   pdf: ^1.12.0
-  font_awesome_flutter: ^8.10.0
+  font_awesome_flutter: ^8.10.1
   barcode_widget: ^1.5.0
+  printing: ^3.7.1
 
 dev_dependencies:
   flutter_test:
