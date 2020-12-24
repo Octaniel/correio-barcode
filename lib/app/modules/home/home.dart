@@ -7,6 +7,9 @@ import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
 class HomePage extends GetView<HomeController> {
+  String value = "";
+  TextEditingController controler = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,7 +37,7 @@ class HomePage extends GetView<HomeController> {
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        'Ultimo imprenso',
+                        'Ultimo impresso',
                         style: TextStyle(
                             fontSize: 15, fontWeight: FontWeight.bold),
                       ),
@@ -56,12 +59,15 @@ class HomePage extends GetView<HomeController> {
                         id: 'barCodeImageUltimo',
                       ),
                       TextField(
+                        controller: controler,
                         onChanged: (v) {
                           controller.dd.value = '';
+                          value = v;
                           controller.update();
                         },
                         onSubmitted: (v) {
                           controller.mudarUltimo(v);
+                          controler.text = '';
                         },
                         textAlign: TextAlign.center,
                         decoration: InputDecoration(
@@ -70,11 +76,41 @@ class HomePage extends GetView<HomeController> {
                           ),
                           labelText: 'Último número',
                           helperText:
-                              'Digite o número do ultimo codigo de barra, se o que esta em cima não for o ultimo',
+                              'Digite o número do ultimo codigo de barra, se o que esta em \ncima não for o ultimo',
                           hintText: 'Número do ultimo codigo de barra',
                           // contentPadding: EdgeInsets.all(5)
                         ),
                       ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      InkWell(
+                        onTap: () {
+                          controller.mudarUltimo(value);
+                          controler.text = '';
+                        },
+                        child: Container(
+                          height: 30,
+                          child: Card(
+                            margin: EdgeInsets.symmetric(horizontal: 30),
+                            color: Colors.grey[300],
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Atualizar ultimo codigo')
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // RaisedButton(
+                      //   padding:
+                      //       EdgeInsets.symmetric(horizontal: Get.width * .2, vertical: 600),
+                      //   onPressed: () async {
+                      //     controller.mudarUltimo(value);
+                      //   },
+                      //   child: Text('Atualizar ultimo codigo'),
+                      // ),
                     ],
                   ),
                 ),
@@ -103,8 +139,10 @@ class HomePage extends GetView<HomeController> {
                         keyboardType: TextInputType.number,
                         onChanged: (v) {
                           try {
-                            var parse = int.parse(v);
-                            controller.quantidade = parse;
+                            if (v.isNotEmpty) {
+                              var parse = int.parse(v);
+                              controller.quantidade = parse;
+                            }
                           } catch (e) {
                             Get.rawSnackbar(
                                 icon: Icon(

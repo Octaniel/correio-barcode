@@ -47,7 +47,6 @@ class HomeController extends GetxController {
     Barcode bc, {
     String filename,
   }) async {
-    GetStorage();
     String data = storage.read('ultimo');
     if (data == null) data = '000339006';
     var dataInt = int.parse(data) + 1;
